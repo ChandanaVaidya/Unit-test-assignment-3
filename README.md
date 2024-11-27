@@ -84,14 +84,6 @@ This is a REST API built using **Node.js**, **Express.js**, and **MongoDB**. The
 
 Includes unit tests written using **Jest** and **supertest**. The tests mock MongoDB methods to ensure proper functionality .
 
-### 2. Test Cases
 
-The following test cases are implemented:
-
-- **User Creation**: Tests for successful and failed user creation.
-- **User Update**: Tests for updating a user (success and failure when user not found).
-- **Get Users List**: Tests for fetching all users (success and failure when the fetch fails).
-
-
-This API service provides basic functionality for creating, updating, and fetching users. It uses **MongoDB** for data storage and **Express.js** to handle HTTP requests. The code includes tests using **Jest** and **supertest** for API validation. 
+Basic functionality for creating, updating, and fetching users. Used **MongoDB** for storage and **Express.js** to handle HTTP requests. The includes tests using **Jest** and **supertest** for API validation. 
 
