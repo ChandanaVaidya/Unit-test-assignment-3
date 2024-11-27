@@ -44,7 +44,7 @@ app.post('/users', async (req, res) => {
       }});
   } catch (error) {
     // console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Error creating user' });
+    res.status(500).json({ message: 'Error creating' });
   }
 });
 
@@ -82,7 +82,7 @@ app.get('/users', async (req, res) => {
     res.json(users);
   } catch (error) {
     // console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Error fetching users' });
+    res.status(500).json({ message: 'Error fetching user' });
   }
 });
 
