@@ -4,13 +4,12 @@ const app = require('./server');
 
 jest.mock('morgan', () => jest.fn((format) => (req, res, next) => next()));  // Mocking
 
-// mocking momngodb
+// Mocking mongodb
 jest.mock('mongodb', () => {
-  // Stimulating methods of mongodb
   const mockInsertOne = jest.fn();
   const mockFindOneAndUpdate = jest.fn();
   const mockFind = jest.fn();
-  
+
   const mockDb = {
     collection: jest.fn().mockReturnValue({
       insertOne: mockInsertOne,
@@ -19,7 +18,7 @@ jest.mock('mongodb', () => {
     }),
   };
 
-  // mock db connections
+  // Mock db connections
   const mockClient = {
     db: jest.fn().mockReturnValue(mockDb),
     close: jest.fn(),
@@ -34,25 +33,35 @@ jest.mock('mongodb', () => {
 });
 
 const mockUser = {
-  "name": 'John doe',
-  "email": 'john.doe@example.com',
-  "age": 30,
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  age: 30,
 };
 
-//for update user
+// For update user
 const mockUpdatedUser = { _id: 'mockObjectId', name: 'John Updated', email: 'updated@example.com', age: 31 };
 
-describe('User api', () => {
+describe('User API', () => {
+  let server;
+
+  beforeAll(() => {
+    // no longer need to manually start the server
+  });
+
+  afterAll(() => {
+    // Ensuring no open handles remain
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
-    MongoClient.connect.mockClear();  // Reseting mock calls before testing
+    jest.clearAllMocks();  // Resetting all mock
   });
 
   it('User created', async () => {
-    const mockInsertOne = jest.fn().mockResolvedValue({ insertedId: 'mockObjectId' });
     MongoClient.connect.mockResolvedValueOnce({
       db: jest.fn().mockReturnValue({
         collection: jest.fn().mockReturnValue({
-          insertOne: mockInsertOne,
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'mockObjectId' }),
         }),
       }),
     });
@@ -82,7 +91,7 @@ describe('User api', () => {
     const mockFindOneAndUpdate = jest.fn().mockResolvedValue({
       value: { _id: 'mockObjectId', name: 'John Updated', email: 'updated@example.com', age: 31 },
     });
-    
+
     MongoClient.connect.mockResolvedValueOnce({
       db: jest.fn().mockReturnValue({
         collection: jest.fn().mockReturnValue({
@@ -94,6 +103,7 @@ describe('User api', () => {
     const res = await request(app).put('/users/mockObjectId').send(mockUpdatedUser);
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Updated');
+    expect(res.body.user._id).toBe('mockObjectId');
     expect(res.body.user.name).toBe('John Updated');
   });
 
