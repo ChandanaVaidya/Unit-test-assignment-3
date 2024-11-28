@@ -9,7 +9,7 @@ This is a REST API built using **Node.js**, **Express.js**, and **MongoDB**. The
 
 ### 1. **Create a User**
 
-- **Route**: `POST /users`
+- **Route**: POST /users
 - **Request Body**:
   ```
   {
@@ -33,7 +33,7 @@ This is a REST API built using **Node.js**, **Express.js**, and **MongoDB**. The
 
 ### 2. **Update a User**
 
-- **Route**: `PUT /users/:id`
+- **Route**: PUT /users/:id
 - **Request Body**:
   ```
   {
@@ -57,7 +57,7 @@ This is a REST API built using **Node.js**, **Express.js**, and **MongoDB**. The
 
 ### 3. **Get Users List**
 
-- **Route**: `GET /users`
+- **Route**: GET /users
 - **Response**:
   ```
   [
