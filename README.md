@@ -88,28 +88,7 @@ Includes unit tests written using **Jest** and **supertest**. The tests mock Mon
 Basic functionality for creating, updating, and fetching users. Used **MongoDB** for storage and **Express.js** to handle HTTP requests. The includes tests using **Jest** and **supertest** for API validation. 
 
 
-### Example of Test Output:
-```bash
-$ npm test
 
-> user-api@1.0.0 test /path/to/project
-> jest
-
-PASS  ./server.test.js
-  User API
-    ✓ User created (X ms)
-    ✓ should return err on failure (X ms)
-    ✓ should update user (X ms)
-    ✓ should return 404 if not found (X ms)
-    ✓ should get users list (X ms)
-    ✓ should return error on fetch fail (X ms)
-
-Test Suites: 1 passed, 1 total
-Tests:       6 passed, 6 total
-Snapshots:   0 total
-Time:        Xs
-```
-- All tests passed successfully, confirming that the user-related API endpoints (create, update, and fetch) work as expected.
 
 
 

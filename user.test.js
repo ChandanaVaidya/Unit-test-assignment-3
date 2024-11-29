@@ -45,7 +45,7 @@ describe('User API', () => {
   let server;
 
   beforeAll(() => {
-    // no longer need to manually start the server
+    // no longer need to manually start  server
   });
 
   afterAll(() => {
