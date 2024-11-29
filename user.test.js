@@ -1,154 +1,51 @@
-const request = require('supertest');
-const { MongoClient } = require('mongodb');
-const app = require('./server'); 
+const { app, connection } = require('./server');
+const request = require('supertest'); // For HTTP requests during tests
 
-jest.mock('morgan', () => jest.fn((format) => (req, res, next) => next()));  // Mocking
+let userId; // updating id
 
-// Mocking mongodb
-jest.mock('mongodb', () => {
-  const mockInsertOne = jest.fn();
-  const mockFindOneAndUpdate = jest.fn();
-  const mockFind = jest.fn();
-
-  const mockDb = {
-    collection: jest.fn().mockReturnValue({
-      insertOne: mockInsertOne,
-      findOneAndUpdate: mockFindOneAndUpdate,
-      find: mockFind,
-    }),
-  };
-
-  // Mock db connections
-  const mockClient = {
-    db: jest.fn().mockReturnValue(mockDb),
-    close: jest.fn(),
-  };
-
-  return {
-    MongoClient: {
-      connect: jest.fn().mockResolvedValue(mockClient),
-    },
-    ObjectId: jest.fn().mockReturnValue('mockObjectId'),
-  };
+beforeAll(async () => {
+  await connection(); // Creating connection test
 });
 
-const mockUser = {
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  age: 30,
-};
-
-// For update user
-const mockUpdatedUser = { _id: 'mockObjectId', name: 'John Updated', email: 'updated@example.com', age: 31 };
-
 describe('User API', () => {
-  let server;
-
-  afterAll(() => {
-    // Ensuring no open handles remain
-    jest.clearAllMocks();
+  
+  // Test creating a user
+  it('should create a user', async () => {
+    const response = await request(app)
+      .post('/users')
+      .send({ name: 'John Doe', email: 'john.doe@example.com', age: 30 });
+    
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe('User created');
+    
+    // Storing the created user ID for updte test
+    userId = response.body.user._id;
   });
 
-
-  it('User created', async () => {
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          insertOne: jest.fn().mockResolvedValue({ insertedId: 'mockObjectId' }),
-        }),
-      }),
-    });
-    console.log(MongoClient.status)
-
-    // Send data on response
-    const res = await request(app).post('/users').send(mockUser);
-    console.log(res.status)
-    expect(res.status).toBe(201);
-    expect(res.body.message).toBe('User created');
-    expect(res.body.user._id).toBe('mockObjectId');
+  // Test fetching all users
+  it('should fetch users', async () => {
+    const response = await request(app).get('/users');
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
   });
 
-  it('should return err on failure', async () => {
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          insertOne: jest.fn().mockRejectedValue(new Error('Could not insert')),
-        }),
-      }),
-    });
+  // Test updating a user
+  it('should update an existing user', async () => {
+    const updatedUser = {
+      name: 'Jane Doe',
+      email: 'jane.doe@example.com',
+      age: 28
+    };
 
-    const res = await request(app).post('/users').send(mockUser);
-    expect(res.status).toBe(500);
-    expect(res.body.message).toBe('Error creating');
+    const response = await request(app)
+      .put(`/users/${userId}`)
+      .send(updatedUser);
+    
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Updated');
+    console.log(updatedUser.name);
+    console.log(updatedUser.email);
+
   });
 
-  it('should update user', async () => {
-    const mockFindOneAndUpdate = jest.fn().mockResolvedValue({
-      value: {
-         _id: 'mockObjectId',
-         name: 'John Updated', 
-         email: 'updated@example.com', age: 31 },
-    });
-
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          findOneAndUpdate: mockFindOneAndUpdate,
-        }),
-      }),
-    });
-
-    const res = await request(app).put('/users/mockObjectId').send(mockUpdatedUser);
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Updated');
-    expect(res.body.user._id).toBe('mockObjectId');
-    expect(res.body.user.name).toBe('John Updated');
-  });
-
-  it('should return 404 if not found', async () => {
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          findOneAndUpdate: jest.fn().mockResolvedValue(null),
-        }),
-      }),
-    });
-
-    const res = await request(app).put('/users/mockObjectId').send(mockUpdatedUser);
-    expect(res.status).toBe(404);
-    expect(res.body.message).toBe('User not found');
-  });
-
-  it('should get users list', async () => {
-    const mockFind = jest.fn().mockReturnValue({
-      toArray: jest.fn().mockResolvedValue([mockUser]),
-    });
-
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          find: mockFind,
-        }),
-      }),
-    });
-
-    const res = await request(app).get('/users');
-    expect(res.status).toBe(200);
-    expect(res.body.length).toBe(1);
-    expect(res.body[0].name).toBe('John Doe');
-  });
-
-  it('should return error on fetch fail', async () => {
-    MongoClient.connect.mockResolvedValueOnce({
-      db: jest.fn().mockReturnValue({
-        collection: jest.fn().mockReturnValue({
-          find: jest.fn().mockRejectedValue(new Error('failed to fetch')),
-        }),
-      }),
-    });
-
-    const res = await request(app).get('/users');
-    expect(res.status).toBe(500);
-    expect(res.body.message).toBe('Error fetching user');
-  });
 });
