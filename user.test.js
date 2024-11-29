@@ -44,18 +44,11 @@ const mockUpdatedUser = { _id: 'mockObjectId', name: 'John Updated', email: 'upd
 describe('User API', () => {
   let server;
 
-  beforeAll(() => {
-    // no longer need to manually start  server
-  });
-
   afterAll(() => {
     // Ensuring no open handles remain
     jest.clearAllMocks();
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();  // Resetting all mock
-  });
 
   it('User created', async () => {
     MongoClient.connect.mockResolvedValueOnce({
@@ -65,9 +58,11 @@ describe('User API', () => {
         }),
       }),
     });
+    console.log(MongoClient.status)
 
     // Send data on response
     const res = await request(app).post('/users').send(mockUser);
+    console.log(res.status)
     expect(res.status).toBe(201);
     expect(res.body.message).toBe('User created');
     expect(res.body.user._id).toBe('mockObjectId');
@@ -89,7 +84,10 @@ describe('User API', () => {
 
   it('should update user', async () => {
     const mockFindOneAndUpdate = jest.fn().mockResolvedValue({
-      value: { _id: 'mockObjectId', name: 'John Updated', email: 'updated@example.com', age: 31 },
+      value: {
+         _id: 'mockObjectId',
+         name: 'John Updated', 
+         email: 'updated@example.com', age: 31 },
     });
 
     MongoClient.connect.mockResolvedValueOnce({
