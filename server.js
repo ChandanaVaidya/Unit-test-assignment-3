@@ -1,4 +1,5 @@
 const express = require('express');
+// OBject id to get unique document id's from the mongo
 const { MongoClient, ObjectId } = require('mongodb');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -6,7 +7,7 @@ const app = express();
 
 // Middleware to log HTTP request.
 app.use(morgan('dev'));  
-// To parse JSON request.
+// To parse JSON requests.
 app.use(bodyParser.json()); 
 
 // Connection to mongodb
@@ -19,7 +20,7 @@ let usersCollection;
 // Function to initialize the MongoDB connection
 const connection = async () => {
   try {
-    const client = await MongoClient.connect(mongoURI, { useUnifiedTopology: true });
+    const client = await MongoClient.connect(mongoURI, { useUnifiedTopology: true }); // sets the underlying driver to use new connection management engine.
     db = client.db(dbName);
     usersCollection = db.collection('names');
     console.log('Connected to db');
